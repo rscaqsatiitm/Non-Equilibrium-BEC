@@ -1,0 +1,52 @@
+% ---------------------------------------------------------------------------
+% Section: phase-space kinetic model (route 2)
+% ---------------------------------------------------------------------------
+\section{Phase-space kinetic model}
+\label{sec:phasespace}
+To remove the ergodic assumption altogether we have solved the ZNG kinetic
+equation for the thermal cloud in phase space with the test-particle method of
+Jackson and Zaremba~\cite{Jackson2002}, in the actual trap of the experiment.
+The trap is the sum of two Gaussian beams of waists $35$ and $45\,\mu$m
+crossing at $40^\circ$ in the horizontal plane, plus gravity. Here, the beam
+depths are scaled together so that the geometric-mean frequency at the
+(gravity-shifted) minimum follows the calibrated ramp of
+Ref.~\cite{MelladoMunoz2020}; the only free quantity of the potential is the
+effective gravity $g_{\rm eff}$, because the quadrupole field of the K MOT,
+which is on during the last $6$~s of the evaporation, exerts a force of
+$\mu_B B'/2$ on the $|F=1,m_F=-1\rangle$ atoms and partly levitates them
+($B'=10$~G/cm cancels one third of gravity). This parameter decides the
+effective trap depth: the saddle point below the minimum lies $2.1\,\mu$K
+above it at $t=1$~s and $65$~nK at $t=2$~s for $g_{\rm eff}=g$, against
+$3.7\,\mu$K and $440$~nK for $g_{\rm eff}=g/2$ [SIM]. Evaporation is
+therefore not modelled by a truncation energy but happens dynamically: an
+atom leaves when its trajectory crosses the saddle, which selects the
+vertical direction and the vertical energy. The thermal atoms are
+represented by $6\times10^4$ test particles (about one per atom) moving in
+the trap and the Hartree-Fock mean field $2gn_c$ of a Thomas-Fermi
+condensate in the local harmonic approximation; thermal-thermal collisions
+are sampled with the direct-simulation Monte Carlo method in cells of
+$1.5\,\mu$m with the Bose enhancement $(1+f_3)(1+f_4)$, and the exchange
+with the condensate with the Monte Carlo rules of Ref.~\cite{Jackson2002}
+[their Eqs.~(35) and (37)], where the occupation numbers $f$ are those of the
+local Bose distribution fitted to the density and kinetic energy of each
+cell and the "in" partner is the test particle of the cell closest in
+velocity to the kinematically required one, with its energy accounted
+exactly. We verified that the thermal-thermal collision rate reproduces the
+classical value $\bar n\sigma\bar v_{\rm rel}$ to $20\%$, that an anisotropic
+velocity distribution relaxes in $2$ to $3$ collisions per atom, and that
+the exchange with the condensate obeys detailed balance: in a homogeneous
+gas the ratio of out- to in-events is $0.97\pm0.04$ at saturation and
+$1.81\pm0.08$ for a thermal chemical potential $0.6\,k_BT$ below $\mu_c$,
+against $1$ and $e^{0.6}=1.82$ [SIM]. The observables are extracted from
+synthetic time-of-flight images: the thermal test particles are propagated
+ballistically for $20$~ms, the condensate is added as a Thomas-Fermi profile
+expanded with the Castin-Dum scaling, and the image in the vertical plane is
+fitted with a Gaussian plus a Thomas-Fermi column density with every pixel
+weighted equally, as in the experiment. Applied to a saturated Bose cloud
+without condensate this analysis returns a "condensed fraction" of $0.17$,
+and with condensed fractions of $0.27$ and $0.50$ it returns $0.34$ and
+$0.56$ with Gaussian temperatures $20$ to $30\%$ below the kinetic ones
+[SIM]: the bimodal fit assigns the Bose-enhanced peak of a nearly saturated
+cloud partly to the condensate.
+
+%% PHASESPACE_RESULTS

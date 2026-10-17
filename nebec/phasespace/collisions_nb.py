@@ -66,30 +66,37 @@ def _g52(z):
     return s
 
 
+# tables for the inversion (n, ekin) -> (kT, z): with x = n (2 pi hbar^2/(m ekin))^{3/2}
+# one has x = h(z) = g_{3/2}(z)^{5/2} / [1.5 g_{5/2}(z)]^{3/2}, monotonic in z.
+_ZTAB = np.concatenate((np.linspace(1e-6, 0.9, 400, endpoint=False), 1 - np.logspace(-1, -7, 300)))
+_K = np.arange(1, 400)
+_G32T = np.array([np.sum(z**_K / _K**1.5) for z in _ZTAB])
+_G52T = np.array([np.sum(z**_K / _K**2.5) for z in _ZTAB])
+_HT = _G32T ** 2.5 / (1.5 * _G52T) ** 1.5
+
+
 @njit(cache=True)
 def bose_params(n, ekin):
     """(kT, z) of an ideal Bose gas with density n and mean kinetic energy ekin
-    per particle: n lambda^3 = g_{3/2}(z), ekin = 1.5 kT g_{5/2}/g_{3/2}."""
-    lo, hi = 1e-6, 1.0 - 1e-9
-    def resid(z):
-        g32 = _g32(z); g52 = _g52(z)
-        kT = ekin / (1.5 * g52 / g32)
-        lam3 = (2 * np.pi * HBAR**2 / (M * kT)) ** 1.5
-        return n * lam3 - g32
-    # resid(z) decreases with z: n lam^3 falls (kT rises) while g_{3/2} rises
-    if resid(lo) <= 0.0:          # density below the Boltzmann value: z -> 0
-        z = lo
-    elif resid(hi) >= 0.0:        # at or above saturation: z -> 1
-        z = hi
+    per particle, by table inversion of n lambda^3 = g_{3/2}(z),
+    ekin = 1.5 kT g_{5/2}/g_{3/2}."""
+    x = n * (2 * np.pi * HBAR**2 / (M * ekin)) ** 1.5
+    if x <= _HT[0]:
+        z = _ZTAB[0]; ratio = 1.5 * _G52T[0] / _G32T[0]
+    elif x >= _HT[-1]:
+        z = _ZTAB[-1]; ratio = 1.5 * _G52T[-1] / _G32T[-1]
     else:
-        for _ in range(50):
-            mid = 0.5 * (lo + hi)
-            if resid(mid) > 0:
+        lo = 0; hi = _HT.shape[0] - 1
+        while hi - lo > 1:
+            mid = (lo + hi) // 2
+            if _HT[mid] <= x:
                 lo = mid
             else:
                 hi = mid
-        z = 0.5 * (lo + hi)
-    kT = ekin / (1.5 * _g52(z) / _g32(z))
+        w = (x - _HT[lo]) / (_HT[hi] - _HT[lo])
+        z = _ZTAB[lo] + w * (_ZTAB[hi] - _ZTAB[lo])
+        ratio = 1.5 * (_G52T[lo] + w * (_G52T[hi] - _G52T[lo])) / (_G32T[lo] + w * (_G32T[hi] - _G32T[lo]))
+    kT = ekin / ratio
     return kT, z
 
 
