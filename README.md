@@ -40,6 +40,7 @@ python scripts/11_phasespace_hold.py 0.7 0.12 nodiss 30000 2.0 hold_nodiss_g0.7_
 python scripts/12_phasespace_plots.py g0.7_fx0.1_K0 g0.7_fx0.1_K1 g0.7_fx0.1_K4
 python scripts/13_phasespace_compare.py noK g0.7_fx0.1_K0
 python scripts/14_phasespace_hold_plots.py hold_nodiss_g0.7_fx0.1 hold_diss_g0.7_fx0.1
+python scripts/15_ne_equilibrium.py                        # fixed-(N,E) equilibrium of the measured states (Table NE)
 ```
 The manuscript draft is `manuscript/theory_section.tex` (inputs: intro_section,
 model_section, results_sections, figures_section, appendix_uniform_loss,

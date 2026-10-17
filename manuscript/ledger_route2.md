@@ -31,3 +31,20 @@ committed) and result files (data/, committed) in the repository.
 | condensate 2870 -> 2160 atoms in 0.1 s (K, shallow trap) | phasespace hold | SIM | logs/ps_hold_diss_g1.0_fx0.1.log |
 | model T 100 -> 63 nK (0.2 s) -> 49 nK (2 s); synthetic-image T 51 nK vs kinetic 50 nK | phasespace hold | SIM | data/results_phasespace_hold.json |
 | measured T 112 -> 57 nK (no K), 111 -> 81 nK (K) | phasespace hold | USER (digitized) | data/digitized/figS2ii_*.csv |
+
+## Fixed-(N,E) equilibrium of the measured states (Sec. NE; scripts/15_ne_equilibrium.py, data/results_ne_equilibrium.json, figures/ne_equilibrium.png)
+
+| value | location | type | pointer |
+|---|---|---|---|
+| F - F_eq1(T_meas) = 0.29 +- 0.08 (K ramp, 6 pts), 0.29 +- 0.10 (K hold, 12), 0.09 +- 0.07 (no K hold, 9) | Table NE, abstract | DATA (digitized) | scripts/15 output |
+| F - F_NE(Eq. 1) = 0.09 +- 0.02, 0.10 +- 0.03, 0.03 +- 0.03 | Table NE, abstract, discussion, conclusion | DATA | scripts/15 output |
+| F - F_NE(ideal) = 0.02 +- 0.03, 0.03 +- 0.03, -0.03 +- 0.02 | Sec. NE | DATA | scripts/15 output |
+| T_meas/T' = 1.07-1.17, 1.08-1.23, 0.98-1.09 | Table NE | DATA | scripts/15 output |
+| sensitivity: T +- 3% -> K residual 0.07 to 0.12; w x 0.85 -> 0.20 | Sec. NE | DATA | scripts/15 output |
+| z of measured thermal cloud 0.67 to 1 | Sec. NE | DERIVED | scripts/15 (ideal gas, calibrated w) |
+| N 1.57e4 -> 7.2e3, T 111 -> 63 nK over 4 s of hold (K) | Sec. NE | USER (digitized) | data/digitized/figS2ii_diss.csv |
+| ergodic model relaxes measured end-of-ramp state 0.46 -> 0.40 in 50 ms; ideal-gas F_NE of that state 0.40 | Sec. NE | SIM / DATA | logs/relax_fig2_t2.txt (scripts/07); scripts/15 |
+| phase-space deep-trap hold ends at F = 0.07; F_NE(Eq. 1) of its initial state 0.06 | Sec. NE | SIM / DATA | data/ps_hold_diss_g0.7_fx0.1.json; scripts/15 |
+| arm axial period 2 to 4 s for U_b = 0.5 uK, z_R = 3.6 / 6 mm (lambda = 1064 nm assumed) | discussion, phase-space section | DERIVED | 2 pi sqrt(m z_R^2 / 2 U_b) [CONFIRM? wavelength, powers] |
+| quadrupole tilt of the arms ~10 uK per mm per 0.1 g | discussion | DERIVED | m x 0.1 g x 1 mm / k_B |
+| model energy deficit with K: 51 nK vs T' = 65 nK (ergodic, end of ramp); ~60 nK Bose-equivalent vs T' = 70 nK (phase space, 2 s hold) | discussion, phase-space section | SIM / DATA | data/results_ramp_1d_empirical.json; data/ps_hold_diss_g1.0_fx0.1.json (T_kin 50 nK / 0.9 / 0.87) |
