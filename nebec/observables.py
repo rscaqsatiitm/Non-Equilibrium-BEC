@@ -27,7 +27,10 @@ def mu_thermal(Nth, T, omega):
     Returns nan if N_th exceeds the saturated number."""
     Nsat = zeta(3) * (C.kB * T / (C.hbar * omega)) ** 3
     if Nth >= Nsat:
-        return np.nan
+        # above saturation the ideal-gas relation has no solution; return the
+        # linearised continuation g_3(e^{mu/kT}) ~ zeta(3) + zeta(2) mu/kT, which
+        # is what a fit routine extrapolating Eq. (S7) would give (flagged).
+        return (Nth / Nsat - 1.0) * zeta(3) / zeta(2) * C.kB * T
     f = lambda lnz: polylog3(np.exp(lnz)) * (C.kB * T / (C.hbar * omega)) ** 3 - Nth
     lnz = brentq(f, -60.0, -1e-12)
     return lnz * C.kB * T

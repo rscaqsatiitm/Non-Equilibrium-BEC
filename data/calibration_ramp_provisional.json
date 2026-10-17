@@ -1,0 +1,11 @@
+{
+ "best": {
+  "eta1": 5.66,
+  "p": 2.802,
+  "gamma_bg": 0.3221,
+  "s_omega": 1.0,
+  "chi2": 245.58,
+  "n_grid": 200,
+  "provisional": true
+ }
+}

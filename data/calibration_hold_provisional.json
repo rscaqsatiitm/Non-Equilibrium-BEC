@@ -1,0 +1,10 @@
+{
+ "best": {
+  "eta_hold": 4.623,
+  "s_omega": 1.08,
+  "gamma_bg": 0.2128,
+  "chi2": 82.77,
+  "n_grid": 200,
+  "provisional": true
+ }
+}

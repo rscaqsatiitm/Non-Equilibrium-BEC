@@ -39,7 +39,7 @@ class Protocol:
 class KineticModel:
     def __init__(self, protocol: Protocol, n_grid=320, x_max=None, spill_rate=None,
                  include_rho_w=True, include_c12=True, include_c22=True, c12_scale=1.0,
-                 c22_scale=1.0, Nc_floor=1.0, open_top=True):
+                 c22_scale=1.0, Nc_floor=1.0, open_top=True, evap_mode='3d', omega_z_ratio=1.0):
         self.p = protocol
         self.n = n_grid
         self.x_max = x_max
@@ -51,6 +51,8 @@ class KineticModel:
         self.c22_scale = c22_scale
         self.Nc_floor = Nc_floor
         self.open_top = open_top
+        self.evap_mode = evap_mode          # '3d': all atoms above U_t leave; '1d': only if the energy in one direction exceeds U_t
+        self.omega_z_ratio = omega_z_ratio  # omega_z/omega_bar for the escape attempt rate in '1d' mode
         self._cache = {}
 
     # ----- grid helpers
@@ -94,7 +96,8 @@ class KineticModel:
         xt = self.p.trap_depth(t) / (C.hbar * omega) - mc
         n_act = int(np.clip(np.floor(xt / self.Delta), 1, n))
         g_act = g.copy()
-        g_act[n_act:] = 0.0
+        if self.evap_mode == '3d':
+            g_act[n_act:] = 0.0
         G0 = C.Gamma0(omega)
         dn = np.zeros(n)
         dNc = 0.0
@@ -107,7 +110,16 @@ class KineticModel:
         # atoms above the truncation energy leave within ~ a trap period
         sr = self.spill_rate if self.spill_rate is not None else omega / (2 * np.pi)
         if self.open_top:
-            dn[n_act:] -= sr * nvec[n_act:]
+            if self.evap_mode == '3d':
+                dn[n_act:] -= sr * nvec[n_act:]
+            else:
+                # ergodic fraction of the energy shell with energy in the
+                # escape direction above the trap depth: (1 - U/eps)^2 for a
+                # 3D harmonic trap; escape attempts at the trap frequency
+                eps = self.x + mc                       # total energy above the trap bottom, units of hbar w
+                Ut = xt + mc
+                frac = np.where(eps > Ut, (1.0 - Ut / np.maximum(eps, 1e-12)) ** 2, 0.0)
+                dn -= sr * self.omega_z_ratio * frac * nvec
         # one-body losses (uniform in energy) and three-body losses
         gam = self.p.gamma_K(t) + self.p.gamma_bg
         dn -= gam * nvec

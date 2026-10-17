@@ -1,0 +1,139 @@
+% ---------------------------------------------------------------------------
+% Section: Model  (input for theory_section.tex)
+% ---------------------------------------------------------------------------
+We describe the Rb gas with the ergodic quantum-kinetic theory of
+Refs.~\cite{Zaremba1999,Bijlsma2000}, extended by the three processes that
+define the experiment: forced evaporation in a trap of decreasing depth and
+frequency, a loss that is uniform in energy and acts on both components
+(collisions with the hot K atoms), and three-body recombination. Our choice of
+this level of theory is a compromise between two considerations. First, the
+quantity measured in the experiment is the condensed fraction of a cloud whose
+atom number, temperature and trap frequency all change by factors of two to
+four during the distillation, so the theory must evolve the full energy
+distribution of the thermal cloud together with the condensate, and conserve
+atom number and energy exactly in the absence of losses. The constant-temperature,
+infinite-reservoir growth equations of Refs.~\cite{Gardiner1997,Gardiner1998}
+cannot do this by construction. However, a full solution of the quantum
+Boltzmann equation in phase space is not needed either: the elastic collision
+rate ($\gamma_{\rm el}\simeq 10$ to $65$~Hz in the experiment) exceeds all other
+rates in the problem by one to two orders of magnitude, so the distribution
+function depends on position and momentum only through the single-particle
+energy. This ergodic approximation reduces the kinetic equation to one
+dimension and makes it possible to simulate the complete two-second protocol,
+including its calibration, with modest computational resources.
+
+\subsection{Kinetic equations}
+The thermal atoms are described by the occupation number $g(\varepsilon,t)$ of
+single-particle states of energy $\varepsilon$ in the Hartree-Fock potential
+$U(\mathbf r,t)=V(\mathbf r)+2gn_c(\mathbf r,t)$. Here, $V=m\bar\omega^2r^2/2$ is
+the external trap with geometric-mean frequency $\bar\omega(t)$,
+$g=4\pi\hbar^2a/m$ is the coupling constant with $a=100.4\,a_0$
+\cite{Egorov2013}, and $n_c$ is the condensate density, which we take in the
+Thomas-Fermi form with chemical potential
+$\mu_c=(\hbar\bar\omega/2)(15N_ca/l)^{2/5}$ and $l=\sqrt{\hbar/m\bar\omega}$. The
+condensate is assumed to follow the number of condensed atoms $N_c(t)$
+adiabatically~\cite{Bijlsma2000}; this is justified because the growth and
+decay times found below ($\gtrsim 0.1$~s) are long compared with the trap
+period. The thermal band starts at $\mu_c$, on the surface of the condensate,
+where $U$ has its minimum~\cite{Bijlsma2000}; the mean-field repulsion of the
+condensate therefore opens a gap between the condensate and the lowest thermal
+states, which is the microscopic origin of the energy gap $\Delta$ invoked in
+Ref.~\cite{MelladoMunoz2020}. We measure thermal energies from the band bottom,
+$\bar\varepsilon=\varepsilon-\mu_c$, and write $\rho(\bar\varepsilon)$ for the
+density of states, which is known analytically for the Thomas-Fermi profile
+[Eqs.~(49)-(50) of Ref.~\cite{Bijlsma2000}] and reduces to
+$\varepsilon^2/2(\hbar\bar\omega)^3$ without condensate.
+
+The projected kinetic equation reads~\cite{Bijlsma2000}
+\begin{equation}
+\frac{\partial}{\partial t}(\rho g)+\frac{\partial}{\partial\bar\varepsilon}(\rho_w g)
+= I_{22}+I_{12}-\gamma(t)\rho g-\Lambda_{\rm ev}\rho g ,
+\label{eq:kinetic}
+\end{equation}
+with the collision integrals
+\begin{align}
+I_{22}(\bar\varepsilon_1)&=\frac{m^3g^2}{2\pi^3\hbar^7}\!\int\!d\bar\varepsilon_2d\bar\varepsilon_3d\bar\varepsilon_4\,
+\rho(\bar\varepsilon_{\min})\,\delta(\bar\varepsilon_1+\bar\varepsilon_2-\bar\varepsilon_3-\bar\varepsilon_4)\nonumber\\
+&\quad\times[(1+g_1)(1+g_2)g_3g_4-g_1g_2(1+g_3)(1+g_4)],
+\label{eq:I22}\\
+I_{12}(\bar\varepsilon_1)&=\frac{m^3g^2}{2\pi^3\hbar^7}N_c\!\int\!d\bar\varepsilon_3d\bar\varepsilon_4\,
+\Phi(\bar\varepsilon_3,\bar\varepsilon_4)\,
+[\delta(\bar\varepsilon_1-\bar\varepsilon_3-\bar\varepsilon_4)\nonumber\\
+&\quad-\delta(\bar\varepsilon_1-\bar\varepsilon_3)-\delta(\bar\varepsilon_1-\bar\varepsilon_4)]\,
+B(\bar\varepsilon_3,\bar\varepsilon_4),
+\label{eq:I12}
+\end{align}
+where $g_i=g(\bar\varepsilon_i)$, $\bar\varepsilon_{\min}$ is the smallest of the
+four energies, $B=(1+g_{3+4})g_3g_4-g_{3+4}(1+g_3)(1+g_4)$ with
+$g_{3+4}=g(\bar\varepsilon_3+\bar\varepsilon_4)$, and $\Phi\in[0,1]$ is the fraction
+of the condensate that can take part in a collision producing thermal atoms at
+$\bar\varepsilon_3$ and $\bar\varepsilon_4$ [Eqs.~(57)-(60) of Ref.~\cite{Bijlsma2000}].
+$I_{12}$ describes the collision of two thermal atoms that sends one of them
+into the condensate and the inverse process; the number of condensed atoms
+obeys $\dot N_c=-\int d\bar\varepsilon\,I_{12}-\gamma N_c-L_3\langle n_c^2\rangle N_c$.
+Both directions of the exchange are contained in $B$: the condensate grows when
+the thermal cloud is oversaturated ($g$ larger than the Bose distribution with
+chemical potential $\mu_c$) and is depleted when it is undersaturated. Hence
+the growth and loss rates $\bar W$ and $\bar K$ of the two-mode model of
+Ref.~\cite{MelladoMunoz2020} are not parameters here but functionals of the
+instantaneous distribution, and the gap enters through $\Phi$, which vanishes
+quadratically when both thermal atoms have energies small compared with
+$\mu_c$.
+
+The term with the weighted density of states $\rho_w$ accounts for the shift
+of the single-particle energies when the condensate mean field changes
+[Eq.~(16) of Ref.~\cite{Bijlsma2000}]; we evaluate it as
+$\rho_w=\dot m_c\,\partial_{m_c}\!\int_0^{\bar\varepsilon}\!\rho\,d\bar\varepsilon'$
+with $m_c=\mu_c/\hbar\bar\omega$. Energies are measured in units of
+$\hbar\bar\omega(t)$, in which an adiabatic change of the trap frequency leaves
+the occupation numbers unchanged, so the evaporation ramp requires no further
+term. Atom number is conserved exactly by Eqs.~(\ref{eq:kinetic})-(\ref{eq:I12})
+without losses, and the total energy
+$E=\int d\bar\varepsilon\,(\bar\varepsilon+\mu_c)\rho g+\tfrac57\mu_cN_c$ is conserved
+up to the discretization error (0.3\% over 6~s in our benchmarks [SIM]).
+
+\subsection{Evaporation, dissipation and losses}
+Evaporation is modelled as in Ref.~\cite{Luiten1996}: states above the trap
+depth $U_t(t)$ are empty and an atom scattered into one of them leaves the
+trap, which appears in Eqs.~(\ref{eq:I22})-(\ref{eq:I12}) through final states
+with $g=0$; atoms left above $U_t$ by the lowering of the trap are removed at
+the trap frequency ($\Lambda_{\rm ev}$). For the crossed dipole trap we take
+$U_t(t)=\eta_1k_BT_1[\bar\omega(t)/\bar\omega_1]^{p}$, with $T_1$ the measured
+temperature at $t=1$~s and $\eta_1$, $p$ calibration parameters; $p=2$ for a
+trap whose depth and frequency follow the beam power alone, and $p>2$ when
+gravity reduces the effective depth. The frequency follows the ramp of
+Ref.~\cite{MelladoMunoz2020}, $\bar\omega(t)=2\pi s_\omega(192-56\,t/{\rm s})$~Hz,
+with $s_\omega$ a scale factor between the value calibrated from Eq.~(1) of
+Ref.~\cite{MelladoMunoz2020} ($s_\omega=1$) and the value measured by parametric
+heating ($s_\omega\simeq0.8$). The dissipation enters as a loss rate
+$\gamma(t)=\gamma_K(t)+\gamma_{\rm bg}$ that is the same for every energy and
+for the condensate: for the collision energies of the experiment the
+momentum transfer in a Rb-K collision exceeds the trap depth in all but
+$\sim10^{-3}$ of the events, so the collision removes the atom whatever its
+state. We use $\gamma_K(t)=a\,t$ with $a=0.112$~Hz/s from Fig.~1(b) of
+Ref.~\cite{MelladoMunoz2020}, and a background rate $\gamma_{\rm bg}$ fitted
+on the data without K. Three-body recombination uses
+$L_3=5.8\times10^{-30}$~cm$^6$/s for the condensate~\cite{Burt1997,Soding1999}
+with $\langle n_c^2\rangle=\tfrac{8}{21}n_{c,{\rm peak}}^2$; for the thermal cloud
+the corresponding rate is below $10^{-3}$~s$^{-1}$ at the densities of the
+experiment and is neglected.
+
+\subsection{Numerical method and observables}
+Equation~(\ref{eq:kinetic}) is discretized on a uniform grid of $n=240$ to $400$
+energies between the band bottom and $1.15\,U_t(t_0)$. On a uniform grid the
+energy-conserving delta functions become index constraints, so both collision
+integrals conserve number and energy to machine precision; the double sum of
+Eq.~(\ref{eq:I22}) is evaluated in $O(n^2)$ operations by splitting it
+according to which pair of states contains the lowest energy. Time integration
+uses an explicit adaptive Runge-Kutta scheme. [SIM: grid convergence, 3\% in
+$N_c$ between $n=200$ and 400.] The temperature of the thermal cloud is defined
+from its mean energy per atom through the equilibrium relation of the same
+model, which coincides with the Bose-distribution temperature whenever the
+cloud is thermal; we also compute the temperature a Gaussian fit to the
+momentum distribution would return, which is systematically lower (by 20\% at
+saturation [SIM]), and use it to bound the systematic error of the comparison
+with the Gaussian-fit temperatures of Ref.~\cite{MelladoMunoz2020}. The
+chemical potential of the thermal cloud, $\tau=T/T_c$ and the equilibrium
+fraction of Eq.~(1) are computed from the model output with the same
+formulas and the same calibrated frequency as in Ref.~\cite{MelladoMunoz2020},
+so that model and data are processed identically.

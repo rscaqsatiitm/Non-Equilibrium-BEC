@@ -1,0 +1,7 @@
+{
+ "note": "Empirical K-induced loss gamma_K(t) = c t^2 fitted to -ln(N_diss/N_nodiss) = c t^3/3 of the digitized Fig. 2 (1x) and Fig. S2(i) (4x) atom numbers; Fig. 1(b) gives the linear law gamma_K = 0.1122 t Hz.",
+ "c_1x": 0.18,
+ "c_4x": 0.456,
+ "k": 2.0,
+ "a_fig1b": 0.1122
+}
