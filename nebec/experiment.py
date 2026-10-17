@@ -19,7 +19,7 @@ def initial_state(M, T_meas, mu_over_kT, N_th, t, Nc0, match_TE=True):
     is slightly higher than T_meas."""
     if not match_TE:
         return truncated_bose(M, T_meas, mu_over_kT, N_target=N_th, t=t, Nc0=Nc0)
-    lo, hi = T_meas, 2.0 * T_meas
+    lo, hi = 0.8 * T_meas, 2.5 * T_meas
     for _ in range(40):
         T = 0.5 * (lo + hi)
         y0, mu = truncated_bose(M, T, mu_over_kT, N_target=N_th, t=t, Nc0=Nc0)
@@ -71,7 +71,7 @@ def run_ramp(params=None, diss_factor=0.0, t_start=1.0, t_end=2.0, n_grid=240, d
     gK = make_gamma_K(a=gk_a, k=gk_k, factor=diss_factor, t_off=(diss_off_at if diss_off_at is not None else np.inf)) if diss_factor > 0 else (lambda t: 0.0)
     prot = Protocol(omega=omega, trap_depth=U, gamma_K=gK, gamma_bg=P["gamma_bg"], L3=C.L3_cond * P["L3_scale"])
     M = KineticModel(prot, n_grid=n_grid, c12_scale=P["c12_scale"], c22_scale=P["c22_scale"], open_top=open_top,
-                     evap_mode=P.get("evap_mode", "3d"), omega_z_ratio=P.get("omega_z_ratio", 1.0))
+                     evap_mode=P.get("evap_mode", "3d"), omega_z_ratio=P.get("omega_z_ratio", 1.0), kick_ratio=P.get("kick_ratio", 0.0))
     x_t0 = U(t_start) / (C.hbar * omega(t_start))
     M.setup_grid(t_start, (x_margin if P.get("evap_mode", "3d") == "3d" else 2.0) * x_t0)
     N1 = P["N1"] * (np.exp(-integrated_gamma_K(t_start, gk_a, diss_factor, gk_k)) if diss_factor > 0 else 1.0)

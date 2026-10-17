@@ -3,6 +3,7 @@
 % [SIM] come from the simulations in this repository (see verification_notes.md).
 \documentclass[aps,prl,twocolumn,superscriptaddress,floatfix]{revtex4-2}
 \usepackage{amsmath,amssymb,graphicx,bm}
+\input{numbers}
 \begin{document}
 
 \title{Kinetic theory of dissipative distillation: finite reservoir and energy conservation}
@@ -10,26 +11,40 @@
 \affiliation{[AFFILIATION?]}
 
 \begin{abstract}
-[ABSTRACT: to be written after the results are final.]
+We solve the ergodic quantum-kinetic equations of a trapped Bose gas, with
+Bose-enhanced collisions between the thermal atoms and between thermal atoms
+and a Thomas-Fermi condensate, for the dissipative distillation experiment of
+Mellado Mu\~noz \emph{et al.} [Phys. Rev. Lett. \textbf{125}, 020403 (2020)],
+in which an evaporating $^{87}$Rb cloud loses atoms uniformly in energy to a
+cold $^{39}$K gas. Unlike the growth equations used so far, the model keeps
+the full energy distribution of a thermal cloud of $10^4$ atoms, conserves
+number and energy, and lets the temperature follow from the dynamics. After a
+single calibration of the evaporation ramp on the data without K, the model
+reproduces the atom number and the condensed fraction of the distillation data
+to better than $0.05$ in $F$, with and without K and at four times the K
+density, and the condensed fraction during the hold after the K atoms are
+removed. It does not reproduce the measured temperatures with K, which
+exceed the kinetic ones by 30 to 45\%, and it predicts that the undersaturated
+thermal clouds inferred from them refill from the condensate within 50~ms,
+against the 3.9~s relaxation observed. The discrepancy exceeds the factor of
+two to four by which the condensate-thermal collision integral is uncertain.
+We discuss which measurement would separate a non-thermal momentum
+distribution from a genuine suppression of the condensate-thermal exchange,
+and show analytically that part of the excess fraction reported relative to
+the constant-temperature equilibrium curve is removed when the comparison is
+made at fixed energy.
 \end{abstract}
 \maketitle
 
 \section{Introduction}
-[Positioning paragraph: what Refs.~\cite{Gardiner1997,Gardiner1998,Bijlsma2000} showed, what they did not do; what the two-mode model of Ref.~\cite{MelladoMunoz2020} showed and what it did not do. Written after results.]
+\input{intro_section}
 
 \section{Model}
 \label{sec:model}
 \input{model_section}
-\section{Calibration on the data without dissipation}
-%% CALIBRATION_SECTION
-\section{Dissipative distillation}
-%% RESULTS_SECTION
-\section{Relaxation after the dissipation is switched off}
-%% RELAXATION_SECTION
-\section{Discussion}
-%% DISCUSSION_SECTION
-\section{Conclusion}
-%% CONCLUSION_SECTION
+\input{results_sections}
+\input{figures_section}
 
+\input{appendix_uniform_loss}
 \bibliography{refs}
 \end{document}

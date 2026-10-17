@@ -39,7 +39,7 @@ class Protocol:
 class KineticModel:
     def __init__(self, protocol: Protocol, n_grid=320, x_max=None, spill_rate=None,
                  include_rho_w=True, include_c12=True, include_c22=True, c12_scale=1.0,
-                 c22_scale=1.0, Nc_floor=1.0, open_top=True, evap_mode='3d', omega_z_ratio=1.0):
+                 c22_scale=1.0, Nc_floor=1.0, open_top=True, evap_mode='3d', omega_z_ratio=1.0, kick_ratio=0.0):
         self.p = protocol
         self.n = n_grid
         self.x_max = x_max
@@ -51,6 +51,7 @@ class KineticModel:
         self.c22_scale = c22_scale
         self.Nc_floor = Nc_floor
         self.open_top = open_top
+        self.kick_ratio = kick_ratio        # rate of glancing K-Rb collisions (energy transfer uniform in [0, U_t]) relative to gamma_K
         self.evap_mode = evap_mode          # '3d': all atoms above U_t leave; '1d': only if the energy in one direction exceeds U_t
         self.omega_z_ratio = omega_z_ratio  # omega_z/omega_bar for the escape attempt rate in '1d' mode
         self._cache = {}
@@ -120,6 +121,26 @@ class KineticModel:
                 Ut = xt + mc
                 frac = np.where(eps > Ut, (1.0 - Ut / np.maximum(eps, 1e-12)) ** 2, 0.0)
                 dn -= sr * self.omega_z_ratio * frac * nvec
+        # glancing K-Rb collisions: an atom receives an energy kick E_t
+        # distributed uniformly in [0, U_t] (flat differential cross section
+        # in the quantum regime, supplement Eq. S2); kicks above U_t are losses
+        if self.kick_ratio > 0 and self.p.gamma_K(t) > 0:
+            gk = self.kick_ratio * self.p.gamma_K(t)
+            Ut = xt + mc                      # trap depth above the trap bottom, units of hbar w
+            nk = int(max(1, round(Ut / self.Delta)))   # number of grid steps spanned by the kick distribution
+            # thermal atoms: leave x_i, arrive uniformly at x_i + j Delta, j = 1..nk
+            cum = np.concatenate(([0.0], np.cumsum(nvec)))
+            arrive = np.zeros(n)
+            # arrive[i] = (1/nk) sum_{j=1..nk} nvec[i-j] = (cum[i] - cum[max(i-nk,0)])/nk
+            idx = np.arange(n)
+            arrive = (cum[idx] - cum[np.maximum(idx - nk, 0)]) / nk
+            dn += gk * (arrive - nvec)
+            # condensate atoms: kicked to energy E_t - mu_c above the band bottom if E_t > mu_c
+            if Nc > 0:
+                nkc = int(max(0, round((Ut - mc) / self.Delta)))
+                if nkc > 0:
+                    dn[1:nkc + 1] += gk * Nc / (nk * self.Delta)
+                dNc -= gk * Nc * (nkc / nk)
         # one-body losses (uniform in energy) and three-body losses
         gam = self.p.gamma_K(t) + self.p.gamma_bg
         dn -= gam * nvec
@@ -173,6 +194,11 @@ def truncated_bose(model: KineticModel, T, mu_over_kT, N_target=None, omega=None
     mc = model.mc(max(Nc0, model.Nc_floor), omega)
     rho, _ = model.tables(mc)
     xt = model.p.trap_depth(t) / (C.hbar * omega) - mc
+    if getattr(model, "evap_mode", "3d") == "1d":
+        # with one-direction escape the steady state is not sharply truncated;
+        # start from the untruncated distribution on the whole grid and let
+        # the model remove the atoms above the trap depth at its own rate
+        xt = model.x[-1] + 1.0
     beta = C.hbar * omega / (C.kB * T)
 
     def dist(mu):

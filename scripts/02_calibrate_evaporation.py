@@ -45,7 +45,7 @@ def cost(theta):
     print(f"eta1={eta1:.3f} p={p:.3f} gbg={gbg:.4f} -> chi2={c:.2f} (N {parts[0]:.1f}, T {parts[1]:.1f}, F {parts[2]:.1f})  [{time.time()-t0:.1f} s]", flush=True)
     return c
 
-x0 = np.array([5.5, 2.5, 0.05]) if evap_mode == "3d" else np.array([4.5, 2.5, 0.1])
+x0 = np.array([5.66, 2.8, 0.32]) if evap_mode == "3d" else np.array([3.58, 2.78, 0.21])
 simplex = np.array([x0, x0 + [1.5, 0, 0], x0 + [0, 1.0, 0], x0 + [0, 0, 0.1]])
 r = minimize(cost, x0, method="Nelder-Mead", options=dict(initial_simplex=simplex, maxiter=maxiter, xatol=0.02, fatol=0.5))
 best = dict(eta1=float(r.x[0]), p=float(r.x[1]), gamma_bg=float(r.x[2]), s_omega=s_omega, evap_mode=evap_mode, chi2=float(r.fun), n_grid=n_grid)
