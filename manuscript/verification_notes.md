@@ -47,3 +47,16 @@ script after any new simulation.
 ## Word counts
 
 Reported in the final message of the session (wc -w on the .tex inputs).
+
+## Headline numbers of the final run (1D evaporation, empirical loss law; see ledger_1d.md)
+
+- Calibration (no K): eta_1 = 3.9, p = 3.1, gamma_bg = 0.12 /s; rms deviations N 6%, T 13%, F 0.05.
+- With K (1x): N 7% rms, F 0.02 rms, F(2 s) = 0.48 vs 0.46; T(2 s) = 51 vs 76 nK (rms 21%).
+- With K (4x): F(2 s) = 0.17 vs 0.23; T(2 s) = 49 vs 78 nK.
+- Fig. 1(b) loss law instead of the empirical one: F(2 s) with K = 0.56, N(2 s) = 17.0e3 (vs 12.6e3 measured).
+- 3D-evaporation variant (own calibration eta_1 = 5.6, p = 2.8, gamma_bg = 0.25): F(2 s) with K = 0.42, T = 54 nK.
+- Relaxation of the measured state at t = 2 s with K, losses off: F 0.46 -> 0.38, 1/e time 50 ms; T 79 -> 64 nK (data/relaxation_fig2_t2s.txt).
+- Hold (1D): F with K 0.18 -> 0.61 (data 0.57); T 111 -> 54 nK (data 63); delta F 0.085 (1.5 s), 0.10 (4 s) vs data 0.28, 0.13.
+- Sensitivity, F(2 s) with K: C12 x0.5/x2: 0.42/0.56; C22 x0.5/x2: 0.36/0.57; eta_1 -/+10%: 0.58/0.39; s_omega 0.9: 0.20; L3 0/x2: 0.48/0.48; T1 +10%: 0.41; c -/+20%: 0.52/0.44.
+- Growth-rate benchmark: model C12 rate / Gardiner-1998 W+ = 2.1 to 3.7 at (mu - mu_c)/kT = 0.01 (data/growth_rate_benchmark.txt).
+- Grid convergence: F(2 s) with K changes from 0.477 (n = 160) to 0.469 (n = 480) (data/grid_convergence_3d.json).

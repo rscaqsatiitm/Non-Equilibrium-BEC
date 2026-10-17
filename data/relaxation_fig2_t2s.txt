@@ -1,0 +1,13 @@
+initial: Nth=6779 Nc=5791 T=75.7 nK  mu_th-mu_c = -33.6 nK (fugacity ln z=-0.444), mu_c=20.7 nK, saturated N_th at this T: 6779
+ideal-gas saturation number at T: 9198  -> undersaturation 0.26
+t=0.000 s: N=12570 Nc=5791 F=0.461 T_E=78.8 nK mu_th=-27.8 nK mu_c=20.7 nK
+t=0.005 s: N=12566 Nc=5684 F=0.452 T_E=77.3 nK mu_th=-22.3 nK mu_c=20.6 nK
+t=0.010 s: N=12563 Nc=5588 F=0.445 T_E=76.0 nK mu_th=-17.7 nK mu_c=20.4 nK
+t=0.020 s: N=12556 Nc=5422 F=0.432 T_E=73.8 nK mu_th=-10.4 nK mu_c=20.2 nK
+t=0.050 s: N=12534 Nc=5100 F=0.407 T_E=69.8 nK mu_th=1.5 nK mu_c=19.7 nK
+t=0.100 s: N=12497 Nc=4854 F=0.388 T_E=66.7 nK mu_th=10.4 nK mu_c=19.3 nK
+t=0.200 s: N=12432 Nc=4686 F=0.377 T_E=63.9 nK mu_th=18.5 nK mu_c=19.0 nK
+t=0.300 s: N=12375 Nc=4649 F=0.376 T_E=62.5 nK mu_th=22.4 nK mu_c=19.0 nK
+t=0.500 s: N=12277 Nc=4695 F=0.382 T_E=61.0 nK mu_th=25.6 nK mu_c=19.1 nK
+t=1.000 s: N=12082 Nc=4955 F=0.410 T_E=59.1 nK mu_th=26.9 nK mu_c=19.5 nK
+1/e time of F relaxation: 0.050 s

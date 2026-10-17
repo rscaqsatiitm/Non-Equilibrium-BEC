@@ -20,7 +20,7 @@ cases = {
     "C22 x0.5": dict(c22_scale=0.5), "C22 x2": dict(c22_scale=2.0),
     "eta1 -10%": dict(eta1=0.9 * base["eta1"]), "eta1 +10%": dict(eta1=1.1 * base["eta1"]),
     "s_omega 0.9": dict(s_omega=0.9), "L3 = 0": dict(L3_scale=0.0), "L3 x2": dict(L3_scale=2.0),
-    "T1 +10%": dict(T1=1.1 * EV.T1_MEAS), "c +20%": "a+", "c -20%": "a-", "evap 3d": dict(evap_mode="3d"), "gamma_K = a t (Fig. 1b)": dict(gK_a=gk["a_fig1b"], gK_k=1.0),
+    "T1 +10%": dict(T1=1.1 * EV.T1_MEAS), "c +20%": "a+", "c -20%": "a-", "gamma_K = a t (Fig. 1b)": dict(gK_a=gk["a_fig1b"], gK_k=1.0),
 }
 res = {}
 for name, mod in cases.items():
