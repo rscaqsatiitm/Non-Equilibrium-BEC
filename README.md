@@ -32,6 +32,14 @@ python scripts/04b_hold_predict.py data/calibration_hold_1d.json 320
 python scripts/05_sensitivity.py data/calibration_ramp_1d_final.json 240
 python scripts/07_supercritical_relaxation.py 6.0 320
 python scripts/06_summary.py data/results_ramp_1d_empirical.json data/results_hold_1d.json data/sensitivity_1d.json
+python scripts/08_three_temperature.py                     # route 1: three-temperature moment model
+python scripts/09_phasespace_tests.py; python scripts/09b_balance_stats.py   # route 2 unit tests
+python scripts/09c_bose_preservation.py 40000; python scripts/09d_onset_latency.py 1.6 30000
+python scripts/10_phasespace_ramp.py 0.7 0.12 0 40000 g0.7_fx0.1_K0 0.1   # <g_eff/g> <gamma_bg> <K: 0|1|4> [N_test] [tag] [fx/g]
+python scripts/11_phasespace_hold.py 0.7 0.12 nodiss 30000 2.0 hold_nodiss_g0.7_fx0.1 0.1
+python scripts/12_phasespace_plots.py g0.7_fx0.1_K0 g0.7_fx0.1_K1 g0.7_fx0.1_K4
+python scripts/13_phasespace_compare.py noK g0.7_fx0.1_K0
+python scripts/14_phasespace_hold_plots.py hold_nodiss_g0.7_fx0.1 hold_diss_g0.7_fx0.1
 ```
 The manuscript draft is `manuscript/theory_section.tex` (inputs: intro_section,
 model_section, results_sections, figures_section, appendix_uniform_loss,

@@ -115,11 +115,11 @@ class CrossedTrap:
     def basin(self, s=None, E=None, half=150e-6, n=96):
         """Return a callable mask(points) that is True for points inside the
         connected region U - U0 < E containing the trap minimum (E defaults to
-        0.999 of the watershed depth).  Used to confine the initial sampling to
+        0.98 of the watershed depth; the margin must exceed the interpolation error of the depth table).  Used to confine the initial sampling to
         bound orbits when gravity or a horizontal force open the trap."""
         from scipy import ndimage
         s = self.s if s is None else s
-        E = 0.999 * self.saddle_depth(s, half, n) if E is None else E
+        E = 0.98 * self.saddle_depth(s, half, n) if E is None else E
         r0, U0 = self.minimum(s)
         ax = np.linspace(-half, half, n)
         X, Y, Z = np.meshgrid(ax + r0[0], ax + r0[1], ax + r0[2], indexing="ij")

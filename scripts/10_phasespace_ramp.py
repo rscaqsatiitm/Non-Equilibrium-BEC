@@ -22,7 +22,7 @@ ROOT = os.path.join(os.path.dirname(__file__), "..")
 gk = json.load(open(os.path.join(ROOT, "data", "gammaK_fit.json")))
 c = {0: 0.0, 1: gk["c_1x"], 4: gk["c_4x"]}[int(kfac)]
 gK = make_gamma_K(a=c, k=2.0) if c > 0 else (lambda t: 0.0)
-gamma = lambda t: gK(t) + gamma_bg
+gamma = lambda t: gK(t + 1.0) + gamma_bg          # simulation time starts at t_lab = 1 s
 om = make_omega(1.0)
 N1 = 55993.0 * (np.exp(-integrated_gamma_K(1.0, c, 1.0, 2.0)) if c > 0 else 1.0)
 
@@ -30,7 +30,7 @@ tr = default_trap(1.0, g_eff=g_fac * 9.81, fx=fx_fac * 9.81)
 rng = np.random.default_rng(11)
 sim = Simulation(tr, lambda t: om(t + 1.0), Cloud(np.zeros((1, 3)), np.zeros((1, 3))), Nc0=10.0, bose=True, dt=40e-6, seed=5, T_ref=120e-9, smooth=True)
 sim._set_trap(0.0)
-cl = Cloud.thermal(Np, T1_MEAS, tr, tr.s, alpha=N1 / Np, rng=rng, mu_over_kT=-0.05, U_max=sim.depth, in_basin=tr.basin(tr.s, 0.999 * sim.depth))
+cl = Cloud.thermal(Np, T1_MEAS, tr, tr.s, alpha=N1 / Np, rng=rng, mu_over_kT=-0.05, U_max=sim.depth, in_basin=tr.basin(tr.s, 0.98 * sim.depth))
 cl.alpha = N1 / cl.r.shape[0]
 sim = Simulation(tr, lambda t: om(t + 1.0), cl, Nc0=10.0, bose=True, dt=40e-6, seed=5, T_ref=120e-9, smooth=True, gamma=gamma, scale_table=sim)
 print(f"start: N={cl.N:.0f}, particles {cl.r.shape[0]}, alpha {cl.alpha:.2f}, f_bar={sim.summary()['f_bar']:.1f} Hz, depth {sim.depth/C.nK:.0f} nK, g_eff={g_fac} g, fx={fx_fac} g", flush=True)

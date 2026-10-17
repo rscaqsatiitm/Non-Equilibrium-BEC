@@ -41,7 +41,7 @@ g3 = lambda z: sum(z**k / k**3 for k in range(1, 400))
 z0 = 1.0 if Nth0 >= Nsat else brentq(lambda z: g3(z) / 1.202 - Nth0 / Nsat, 1e-6, 1.0)
 mu_over_kT = np.log(z0) + mu_c / (C.kB * T0)          # relative to the trap bottom, band bottom at mu_c
 cond = TFCondensate(Nc0, w, r0, axes)
-cl = Cloud.thermal(Np, T0, tr, tr.s, alpha=Nth0 / Np, rng=rng, mu_over_kT=mu_over_kT, cond=cond, U_max=sim0.depth, in_basin=tr.basin(tr.s, 0.999 * sim0.depth))
+cl = Cloud.thermal(Np, T0, tr, tr.s, alpha=Nth0 / Np, rng=rng, mu_over_kT=mu_over_kT, cond=cond, U_max=sim0.depth, in_basin=tr.basin(tr.s, 0.98 * sim0.depth))
 cl.alpha = Nth0 / cl.r.shape[0]
 sim = Simulation(tr, lambda t: om_cal, cl, Nc0=Nc0, bose=True, dt=40e-6, seed=9, T_ref=T0, smooth=True, gamma=lambda t: gamma_bg, scale_table=sim0)
 print(f"{series}: N0={N0:.0f} T0={T0*1e9:.0f} nK F0={F0:.3f} -> Nth={Nth0:.0f} (N_sat={Nsat:.0f}, z={z0:.3f}), Nc={Nc0:.0f}, mu_c={mu_c/C.nK:.1f} nK; trap f={np.round(w/2/np.pi,1)} Hz depth {sim.depth/C.nK:.0f} nK", flush=True)
