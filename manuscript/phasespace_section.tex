@@ -94,4 +94,92 @@ $2$--$3$ collisions of each other [SIM]: the factor-of-two anisotropy of
 the moment model of Sec.~\ref{sec:aniso} is an upper bound set by its
 single-direction escape rule, not a property of the real trap.
 
-%% PHASESPACE_HOLD
+\subsection{Hold phase and the relaxation time}
+The hold phase does not depend on the ramp calibration, because it starts
+from the measured state, and it is where the time scale of the relaxation
+can be read off. We take the trap at the calibrated $\bar\omega/2\pi=99$~Hz
+and the initial state from the first points of Fig.~S2(ii):
+$N=1.94\times10^4$, $T=112$~nK, $F=0.20$ for the sample evaporated without
+K, and $N=1.57\times10^4$, $T=111$~nK, $F=0.18$ for the sample evaporated
+with K. Here, the thermal atoms are sampled from the Bose distribution with
+the fugacity that reproduces the measured thermal number at the measured
+temperature, $z=0.99$ and $0.87$ respectively, so that the sample evaporated
+with K starts $13\%$ below saturation, as the measured $\mu_{\rm BEC}$ of
+Fig.~2(d) indicates. The measured atom number falls from $1.94\times10^4$
+to $1.05\times10^4$ during the first $2$~s of the hold, which a background
+loss of $0.12$~s$^{-1}$ cannot produce; the trap must still evaporate, and
+indeed the ergodic calibration of Sec.~\ref{sec:hold} found
+$\eta=3.4$ for the hold. We therefore ran two cases: a deep trap
+($g_{\rm eff}=0.7\,g$, $f_x=0.1\,g$, depth $700$~nK, $\eta=6.3$) in which
+evaporation is negligible, and a shallow one ($g_{\rm eff}=g$,
+$f_x=0.1\,g$, depth $362$~nK, $\eta=3.2$) that reproduces the measured
+atom number ($1.02\times10^4$ and $8.3\times10^3$ at $2$~s against
+$1.05\times10^4$ and $9.0\times10^3$ measured) [SIM].
+
+In the deep trap the condensate of the sample evaporated with K is depleted
+with a time constant of $175$~ms from $F=0.18$ to $0.07$, and that of the
+sample without K with $170$~ms from $0.20$ to $0.15$ [SIM]: in contact with
+a thermal cloud of the measured number and temperature, the condensate
+does not survive for $3.9$~s, in a model with the real trap geometry, a
+non-ergodic thermal cloud and an exchange rate validated against detailed
+balance. This confirms the conclusion of the ergodic model of
+Sec.~\ref{sec:hold} with a time constant three times longer, the difference
+being the finite rate at which the test-particle cloud redistributes the
+atoms it receives.
+
+The shallow trap, shown in Fig.~\ref{fig:pshold}, changes the picture. The
+condensate of the sample evaporated with K is first depleted, from $2870$ to
+$2160$ atoms in $0.1$~s, and then grows again because the evaporation cools
+the cloud: the model gives $F=0.18$, $0.25$, $0.34$, $0.40$ and $0.43$ at
+$0.2$, $0.5$, $1$, $1.5$ and $2$~s, against $0.18$, $0.26$, $0.38$, $0.46$
+and $0.48$ measured, and for the sample without K $0.26$, $0.36$, $0.45$,
+$0.51$ and $0.55$ against $0.34$, $0.43$, $0.56$, $0.63$ and $0.66$ [SIM].
+The atom numbers and condensed fractions of both samples are thus
+reproduced to within $0.1$ in $F$ with no adjusted parameter beyond the
+trap depth. The temperatures are not: the model cloud cools from $100$ to
+$63$~nK within the first $0.2$~s and then to $49$~nK at $2$~s in both
+samples, whereas the measured temperature falls from $112$ to $57$~nK for
+the sample without K and only from $111$ to $81$~nK for the sample with K.
+The synthetic images give the same temperature as the kinetic one
+($51$ against $50$~nK at $2$~s), so the discrepancy is not an artefact of
+the bimodal fit in the model. In other words, the number of atoms and the
+condensed fraction of the dissipated sample during the hold are those of a
+cloud in kinetic equilibrium at $50$ to $60$~nK, while its Gaussian
+temperature is $80$ to $100$~nK. Taken together with the depletion times
+above, this locates the ingredient missing from both kinetic models: they
+assume that the thermal cloud has a single temperature, measured by the
+Gaussian wings of the time-of-flight image, and that this temperature also
+governs the low-energy part of the distribution in contact with the
+condensate. If the wings of the dissipated sample are hotter than its core,
+as a Rb cloud that has exchanged energy with the K atoms could be, the
+condensate equilibrates with the cold core on the collisional time scale
+of $0.1$ to $0.2$~s found here, while the wings, where the density and the
+collision rate are lowest, relax on a longer time scale; the measured
+"supercritical" fraction would then be the equilibrium fraction of the
+core, and the $3.9$~s of Fig.~4 the thermalization time of the wings. We
+have not simulated this scenario, because the test-particle cloud
+thermalizes internally within a few collisions and we do not know the
+energy spectrum of the K-Rb collisions; it is testable with the existing
+data by fitting the thermal part of the images with two Gaussians, or with
+the full Bose-enhanced profile, and comparing the resulting core
+temperature with the one that Eq.~(1) requires for the measured $F$.
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{../figures/phasespace_hold.png}
+\caption{Phase-space model of the hold phase in the shallow trap
+($g_{\rm eff}=g$, $f_x=0.1\,g$, depth $362$~nK at
+$\bar\omega/2\pi=99$~Hz), started from the measured state of the samples
+evaporated without K (blue) and with K (red); $3\times10^4$ test particles,
+cells of $1.5\,\mu$m, time step $40\,\mu$s, background loss
+$0.12$~s$^{-1}$, three-body loss on the condensate. Top: atom number,
+temperature (kinetic, solid; bimodal fit of the synthetic images, dashed)
+and condensed fraction (model, solid; bimodal fit, dashed) with the
+digitized data of Fig.~S2(ii). Bottom: condensed fraction minus the
+ideal-gas equilibrium value at the model's own $N$ and $T$ (negative,
+because the kinetic temperature of the test-particle cloud lies below the
+Bose temperature that its thermal number implies, see
+Sec.~\ref{sec:phasespace}), with the data of Fig.~4 (black); kinetic
+temperature ratios between the axes; condensate and thermal numbers.}
+\label{fig:pshold}
+\end{figure}

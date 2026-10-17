@@ -22,3 +22,12 @@ committed) and result files (data/, committed) in the repository.
 | measured t = 2 s: 2.0e4, 65 nK, 0.64; 1.26e4, 0.46; 6.0e3, 0.23 | phasespace results | USER (digitized) | data/digitized/fig2_nodiss.csv, fig2_diss.csv, figS2i_diss.csv |
 | growth 1.0e4 atoms/s at T = 120 nK | phasespace results | SIM | logs/onset_1.6.log (Nc 2220 -> 4189 between 0.2 and 0.38 s) |
 | T_y/T_z <= 1.2 at t = 2 s; collision rate 5-15 Hz | phasespace results | SIM | data/ps_g0.7_fx0.1_K0.json (Tmy/Tmz), c22 counters in logs |
+| hold initial states: 1.94e4, 112 nK, 0.20 (no K); 1.57e4, 111 nK, 0.18 (K); z = 0.99 / 0.87 | phasespace hold | USER (digitized) / DERIVED | data/digitized/figS2ii_*.csv first rows; z from N_th/N_sat (ideal gas) in scripts/11 |
+| measured N during hold 1.94e4 -> 1.05e4 (no K), 1.57e4 -> 9.0e3 (K) at 2 s | phasespace hold | USER (digitized) | data/digitized/figS2ii_nodiss.csv, figS2ii_diss.csv |
+| eta_hold = 3.4 (ergodic calibration) | phasespace hold | SIM | data/calibration_hold_1d.json |
+| deep trap 700 nK (g_eff = 0.7 g, f_x = 0.1 g): tau = 175 ms (K), 170 ms (no K); F 0.18 -> 0.07, 0.20 -> 0.15 | phasespace hold | SIM | logs/ps_hold_{diss,nodiss}_g0.7_fx0.1.log, data/ps_hold_*_g0.7_fx0.1.json; exponential fit over 2 s |
+| shallow trap 362 nK (g_eff = g, f_x = 0.1 g): N(2 s) = 1.02e4 / 8.3e3; F(t) model 0.18/0.25/0.34/0.40/0.43 (K), 0.26/0.36/0.45/0.51/0.55 (no K) at 0.2/0.5/1/1.5/2 s | phasespace hold | SIM | data/ps_hold_*_g1.0_fx0.1.json, data/results_phasespace_hold.json |
+| measured F(t) 0.18/0.26/0.38/0.46/0.48 (K), 0.34/0.43/0.56/0.63/0.66 (no K) | phasespace hold | USER (digitized; 0.5 s value interpolated between 0.4 and 0.6 s) | data/digitized/figS2ii_*.csv |
+| condensate 2870 -> 2160 atoms in 0.1 s (K, shallow trap) | phasespace hold | SIM | logs/ps_hold_diss_g1.0_fx0.1.log |
+| model T 100 -> 63 nK (0.2 s) -> 49 nK (2 s); synthetic-image T 51 nK vs kinetic 50 nK | phasespace hold | SIM | data/results_phasespace_hold.json |
+| measured T 112 -> 57 nK (no K), 111 -> 81 nK (K) | phasespace hold | USER (digitized) | data/digitized/figS2ii_*.csv |
