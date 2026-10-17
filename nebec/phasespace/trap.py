@@ -112,6 +112,29 @@ class CrossedTrap:
                 lo = mid
         return 0.5 * (lo + hi)
 
+    def basin(self, s=None, E=None, half=150e-6, n=96):
+        """Return a callable mask(points) that is True for points inside the
+        connected region U - U0 < E containing the trap minimum (E defaults to
+        0.999 of the watershed depth).  Used to confine the initial sampling to
+        bound orbits when gravity or a horizontal force open the trap."""
+        from scipy import ndimage
+        s = self.s if s is None else s
+        E = 0.999 * self.saddle_depth(s, half, n) if E is None else E
+        r0, U0 = self.minimum(s)
+        ax = np.linspace(-half, half, n)
+        X, Y, Z = np.meshgrid(ax + r0[0], ax + r0[1], ax + r0[2], indexing="ij")
+        pts = np.stack([X.ravel(), Y.ravel(), Z.ravel()], axis=1)
+        U = self.potential(pts, s).reshape(n, n, n) - U0
+        lab, _ = ndimage.label(U < E)
+        inside = lab == lab[n // 2, n // 2, n // 2]
+        d = ax[1] - ax[0]
+        def mask(p):
+            idx = np.rint((np.atleast_2d(p) - r0 + half) / d).astype(int)
+            ok = np.all((idx >= 0) & (idx < n), axis=1)
+            idx = np.clip(idx, 0, n - 1)
+            return ok & inside[idx[:, 0], idx[:, 1], idx[:, 2]]
+        return mask
+
     def set_scale_for_omega(self, omega_bar_target, s_lo=0.01, s_hi=100.0):
         """Choose the power scale s such that the geometric-mean frequency at the
         (gravity-shifted) minimum equals omega_bar_target."""

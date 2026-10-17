@@ -10,8 +10,11 @@ from .ergodic_exchange import ErgodicExchange
 
 class Simulation:
     def __init__(self, trap, omega_bar, cloud, Nc0=0.0, cell=1.5e-6, bose=True, fcap=60.0, Av_factor=3.5,
-                 dv_factor=0.5, T_ref=100e-9, gamma=lambda t: 0.0, L3=C.L3_cond, dt=20e-6, seed=0, c12=True, c22=True, smooth=True, vtol_factor=1.0, Nc_floor=1.0, exchange='ergodic', exchange_every=5):
+                 dv_factor=0.5, T_ref=100e-9, gamma=lambda t: 0.0, L3=C.L3_cond, dt=20e-6, seed=0, c12=True, c22=True, smooth=True, vtol_factor=1.0, Nc_floor=1.0, exchange='ergodic', exchange_every=5, scale_table=None):
         self.trap, self.omega_bar, self.cloud = trap, omega_bar, cloud
+        if scale_table is not None:      # reuse the (expensive) trap table of another Simulation on the same trap
+            for k in ('_tab_f', '_tab_s', '_tab_w', '_tab_r0', '_tab_axes', '_tab_depth'):
+                setattr(self, k, getattr(scale_table, k))
         self.cell, self.bose, self.fcap, self.Av_factor = cell, bose, fcap, Av_factor
         self.dv = dv_factor * np.sqrt(C.kB * T_ref / C.m_Rb)     # velocity-cell side for the occupation estimate
         self.smooth = smooth; self.vtol = vtol_factor * np.sqrt(C.kB * T_ref / C.m_Rb)
