@@ -5,15 +5,20 @@ from .trap import CrossedTrap, default_trap
 from .particles import Cloud
 from .condensate import TFCondensate
 from .collisions_nb import collision_step
+from .ergodic_exchange import ErgodicExchange
 
 
 class Simulation:
     def __init__(self, trap, omega_bar, cloud, Nc0=0.0, cell=1.5e-6, bose=True, fcap=60.0, Av_factor=3.5,
-                 dv_factor=0.5, T_ref=100e-9, gamma=lambda t: 0.0, L3=C.L3_cond, dt=20e-6, seed=0, c12=True, c22=True, smooth=True, vtol_factor=1.0):
+                 dv_factor=0.5, T_ref=100e-9, gamma=lambda t: 0.0, L3=C.L3_cond, dt=20e-6, seed=0, c12=True, c22=True, smooth=True, vtol_factor=1.0, Nc_floor=1.0, exchange='ergodic', exchange_every=5):
         self.trap, self.omega_bar, self.cloud = trap, omega_bar, cloud
         self.cell, self.bose, self.fcap, self.Av_factor = cell, bose, fcap, Av_factor
         self.dv = dv_factor * np.sqrt(C.kB * T_ref / C.m_Rb)     # velocity-cell side for the occupation estimate
         self.smooth = smooth; self.vtol = vtol_factor * np.sqrt(C.kB * T_ref / C.m_Rb)
+        self.Nc_floor = Nc_floor
+        self.exchange = exchange          # 'ergodic' (hybrid) or 'montecarlo' (Jackson-Zaremba)
+        self.exchange_every = exchange_every
+        self.ergx = ErgodicExchange(rng=np.random.default_rng(seed + 1))
         self.gamma, self.L3, self.dt = gamma, L3, dt
         self.rng = np.random.default_rng(seed)
         self.seed = seed
@@ -51,6 +56,7 @@ class Simulation:
         self.r0 = np.array([np.interp(f, self._tab_f, self._tab_r0[:, i]) for i in range(3)])
         k = int(np.argmin(np.abs(self._tab_f - f))); self._axes = self._tab_axes[k]
         self.depth = float(np.interp(f, self._tab_f, self._tab_depth))
+        self.U0_now = self.trap.potential(self.r0[None, :])[0]
         return
 
     def _bin(self):
@@ -69,22 +75,29 @@ class Simulation:
         if i_step % trap_update_every == 0:
             self._set_trap(self.t)
             self.cond.update_trap(self.w, self.r0, self._axes)
-        self.cloud.step(dt, self.trap, self.trap.s, self.cond if self.Nc > 0 else None)
+        self.cloud.step(dt, self.trap, self.trap.s, self.cond if self.Nc > self.Nc_floor else None)
         alive = np.ones(self.cloud.r.shape[0], dtype=np.bool_)
         order, starts, ends = self._bin()
-        nc_at = self.cond.density(self.cloud.r) if (self.c12_on and self.Nc > 0) else np.zeros(self.cloud.r.shape[0])
+        nc_at = self.cond.density(self.cloud.r) if self.c12_on else np.zeros(self.cloud.r.shape[0])
         max_new = 4000
         new_r = np.zeros((max_new, 3)); new_v = np.zeros((max_new, 3))
         n22, n_out, n_in, n_new = collision_step(self.cloud.r, self.cloud.v, alive, order, starts, ends, self.cloud.alpha, self.cell, self.dv, dt,
                                                  nc_at, self.bose, self.fcap, self.Av_factor, self.seed + i_step, new_r, new_v, max_new,
-                                                 self.c22_on, self.c12_on and self.Nc > 0, self.smooth, self.vtol)
+                                                 self.c22_on, self.c12_on and self.exchange == 'montecarlo', self.smooth, self.vtol)
         self.stats["n_c22"] += n22; self.stats["n_out"] += n_out; self.stats["n_in"] += n_in
         self.Nc += (n_in - n_out) * self.cloud.alpha
+        if self.c12_on and self.Nc < self.Nc_floor:
+            self.Nc = self.Nc_floor          # seed: the lowest mode is never empty (spontaneous growth)
         if n_new:
             self.cloud.r = np.vstack([self.cloud.r, new_r[:n_new]]); self.cloud.v = np.vstack([self.cloud.v, new_v[:n_new]])
             alive = np.concatenate([alive, np.ones(n_new, dtype=np.bool_)])
         if (~alive).any():
             self.cloud.r = self.cloud.r[alive]; self.cloud.v = self.cloud.v[alive]
+        if self.c12_on and self.exchange == 'ergodic' and i_step % self.exchange_every == 0:
+            self.ergx.apply(self, dt * self.exchange_every)
+            if self.Nc < self.Nc_floor:
+                self.Nc = self.Nc_floor
+            self.stats["n_out"] = self.ergx.n_removed; self.stats["n_in"] = self.ergx.n_created
         # uniform loss (K + background) on thermal particles and condensate
         g = self.gamma(self.t)
         if g > 0:
@@ -99,7 +112,7 @@ class Simulation:
             self._remove_escaped()
         self.t += dt
 
-    def _remove_escaped(self, r_max=120e-6):
+    def _remove_escaped(self, r_max=70e-6):
         d = self.cloud.r - self.r0
         gone = (np.abs(d[:, 0]) > r_max) | (np.abs(d[:, 1]) > r_max) | (np.abs(d[:, 2]) > r_max)
         n = gone.sum()
@@ -116,8 +129,19 @@ class Simulation:
         return self
 
     # ---- diagnostics
+    def trapped_mask(self, radius=35e-6):
+        """Particles still in the trap region (excludes atoms falling away
+        after crossing the saddle, which would dominate the kinetic temperatures)."""
+        d = self.cloud.r - self.r0
+        return (np.abs(d[:, 0]) < radius) & (np.abs(d[:, 1]) < radius) & (np.abs(d[:, 2]) < radius)
+
+    def trapped_cloud(self):
+        from .particles import Cloud
+        m = self.trapped_mask()
+        return Cloud(self.cloud.r[m], self.cloud.v[m], self.cloud.alpha)
+
     def summary(self):
-        cl = self.cloud
+        cl = self.trapped_cloud()
         Tk = cl.axis_temperatures()
         Nth = cl.N
         return dict(t=self.t, Nth=Nth, Nc=self.Nc, N=Nth + self.Nc, F=self.Nc / max(Nth + self.Nc, 1e-9), Tx=Tk[0], Ty=Tk[1], Tz=Tk[2],

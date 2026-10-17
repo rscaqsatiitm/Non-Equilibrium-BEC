@@ -46,7 +46,7 @@ sim = Simulation(tr, lambda t: om_cal, cl, Nc0=Nc0, bose=True, dt=40e-6, seed=9,
 print(f"{series}: N0={N0:.0f} T0={T0*1e9:.0f} nK F0={F0:.3f} -> Nth={Nth0:.0f} (N_sat={Nsat:.0f}, z={z0:.3f}), Nc={Nc0:.0f}, mu_c={mu_c/C.nK:.1f} nK; trap f={np.round(w/2/np.pi,1)} Hz depth {sim.depth/C.nK:.0f} nK", flush=True)
 rows = []; T0w = time.time()
 def cb(S):
-    dd = S.summary(); Tm = momentum_temperatures(S.cloud); ob = experiment_observables(S.cloud, S.cond, axes=(0, 2))
+    dd = S.summary(); Tm = momentum_temperatures(S.trapped_cloud()); ob = experiment_observables(S.trapped_cloud(), S.cond, axes=(0, 2))
     dd.update(Tmx=Tm[0], Tmy=Tm[1], Tmz=Tm[2], T_fit_x=ob["T_fit_x"], T_fit_z=ob["T_fit_y"], F_fit=ob["F_fit"], Nth_fit=ob["N_th_fit"], Nc_fit=ob["N_c_fit"])
     rows.append(dd)
     print(f"t={dd['t']:.2f} N={dd['N']:.0f} Nth={dd['Nth']:.0f} Nc={dd['Nc']:.0f} F={dd['F']:.3f} T_kin x,y,z={Tm[0]*1e9:.0f},{Tm[1]*1e9:.0f},{Tm[2]*1e9:.0f} | fit T x,z={ob['T_fit_x']*1e9:.0f},{ob['T_fit_y']*1e9:.0f} F_fit={ob['F_fit']:.3f} | out={dd['n_out']} in={dd['n_in']} c22={dd['n_c22']} evap={dd['n_evap']:.0f} [{time.time()-T0w:.0f} s]", flush=True)

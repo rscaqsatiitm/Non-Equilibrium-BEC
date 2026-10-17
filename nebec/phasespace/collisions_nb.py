@@ -101,6 +101,16 @@ def bose_params(n, ekin):
 
 
 @njit(cache=True)
+def _fs_ex(vx, vy, vz, kT, z, fcap, f_ex, vcut):
+    """Smooth Bose occupation plus the low-momentum excess."""
+    e = 0.5 * M * (vx * vx + vy * vy + vz * vz)
+    f = _fsmooth(e, kT, z, fcap)
+    if vx * vx + vy * vy + vz * vz < vcut * vcut:
+        f += f_ex
+    return f if f < fcap else fcap
+
+
+@njit(cache=True)
 def _fsmooth(e, kT, z, fcap):
     x = e / kT - np.log(z)
     if x < 1e-6:
@@ -148,14 +158,41 @@ def collision_step(r, v, alive, order, starts, ends, alpha, cell, dv, dt, nc_at,
             if v2 > vmax2:
                 vmax2 = v2
         vth = np.sqrt(vth2 / (3.0 * n))
-        kT = 1.0; zloc = 0.5
+        kT = 1.0; zloc = 0.5; f_ex = 0.0; vcut = 0.5 * vth
         if bose and smooth:
             kT, zloc = bose_params(dens, 0.5 * M * vth2 / n)
+            # oversaturation: the local Bose fit saturates at z = 1 and cannot
+            # represent an excess population of the lowest momenta; estimate it
+            # by counting the particles with |v| < vcut against the Bose expectation
+            nlow = 0
+            for k in range(n):
+                i = ids[k]
+                if v[i, 0] ** 2 + v[i, 1] ** 2 + v[i, 2] ** 2 < vcut * vcut:
+                    nlow += 1
+            # expected fraction: int_0^vcut v^2 f dv / int_0^inf v^2 f dv (20-point quadrature)
+            num = 0.0; den = 0.0
+            vmaxq = 8.0 * np.sqrt(kT / M)
+            nq = 160
+            dvq = vmaxq / nq
+            for q in range(nq):
+                vq = (q + 0.5) * dvq
+                fq = _fsmooth(0.5 * M * vq * vq, kT, zloc, 1e9) * vq * vq
+                den += fq
+                if vq < vcut:
+                    num += fq
+            nexp = n * num / max(den, 1e-300)
+            excess = nlow - nexp
+            if excess > 0.0:
+                f_ex = excess * alpha * H3 / (M ** 3 * cellvol * (4.0 / 3.0) * np.pi * vcut ** 3)
+                if f_ex > fcap:
+                    f_ex = fcap
         # ---------------- C22
         if do_c22 and n >= 2:
             Bmax = 1.0
             if bose and smooth:
-                fmax = _fsmooth(0.0, kT, zloc, fcap)
+                fmax = _fsmooth(0.0, kT, zloc, fcap) + f_ex
+                if fmax > fcap:
+                    fmax = fcap
                 Bmax = (1.0 + fmax) ** 2
                 if Bmax > fcap:
                     Bmax = fcap
@@ -195,8 +232,7 @@ def collision_step(r, v, alive, order, starts, ends, alpha, cell, dv, dt, nc_at,
                 acc = vr / vmax
                 if bose:
                     if smooth:
-                        e3 = 0.5 * M * (v3x * v3x + v3y * v3y + v3z * v3z); e4 = 0.5 * M * (v4x * v4x + v4y * v4y + v4z * v4z)
-                        B = (1.0 + _fsmooth(e3, kT, zloc, fcap)) * (1.0 + _fsmooth(e4, kT, zloc, fcap))
+                        B = (1.0 + _fs_ex(v3x, v3y, v3z, kT, zloc, fcap, f_ex, vcut)) * (1.0 + _fs_ex(v4x, v4y, v4z, kT, zloc, fcap, f_ex, vcut))
                     else:
                         c3, _ = _count(vk, 0, n, _vkey(v3x, v3y, v3z, dv)); c4, _ = _count(vk, 0, n, _vkey(v4x, v4y, v4z, dv))
                         B = (1.0 + c3 * fnorm) * (1.0 + c4 * fnorm)
@@ -230,8 +266,7 @@ def collision_step(r, v, alive, order, starts, ends, alpha, cell, dv, dt, nc_at,
                     B = 1.0
                     if bose:
                         if smooth:
-                            e3 = 0.5 * M * (o3x * o3x + o3y * o3y + o3z * o3z); e4 = 0.5 * M * (o4x * o4x + o4y * o4y + o4z * o4z)
-                            B = 1.0 + _fsmooth(e3, kT, zloc, fcap) + _fsmooth(e4, kT, zloc, fcap)
+                            B = 1.0 + _fs_ex(o3x, o3y, o3z, kT, zloc, fcap, f_ex, vcut) + _fs_ex(o4x, o4y, o4z, kT, zloc, fcap, f_ex, vcut)
                         else:
                             c3, _ = _count(vk, 0, n, _vkey(o3x, o3y, o3z, dv)); c4, _ = _count(vk, 0, n, _vkey(o4x, o4y, o4z, dv))
                             B = 1.0 + (c3 + c4) * fnorm
@@ -257,7 +292,7 @@ def collision_step(r, v, alive, order, starts, ends, alpha, cell, dv, dt, nc_at,
                     i3x = vx + tx + shift * ux; i3y = vy + ty + shift * uy; i3z = vz + tz + shift * uz
                     if smooth:
                         e4 = 0.5 * M * (i4x * i4x + i4y * i4y + i4z * i4z)
-                        f4 = _fsmooth(e4, kT, zloc, fcap) if bose else np.exp(-e4 / (M * vth * vth))
+                        f4 = _fs_ex(i4x, i4y, i4z, kT, zloc, fcap, f_ex, vcut) if bose else np.exp(-e4 / (M * vth * vth))
                         c4 = 1
                     else:
                         c4, first4 = _count(vk, 0, n, _vkey(i4x, i4y, i4z, dv))

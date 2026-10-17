@@ -24,7 +24,7 @@ G = 9.81
 
 
 class CrossedTrap:
-    def __init__(self, U10, U20, w1=35e-6, w2=45e-6, half_angle_deg=20.0, gravity=True, g_eff=None):
+    def __init__(self, U10, U20, w1=35e-6, w2=45e-6, half_angle_deg=20.0, gravity=True, g_eff=None, fx=0.0):
         self.U10, self.U20, self.w1, self.w2 = U10, U20, w1, w2
         th = np.deg2rad(half_angle_deg)
         self.d1 = np.array([np.cos(th), np.sin(th), 0.0])
@@ -32,6 +32,7 @@ class CrossedTrap:
         # effective gravity: the MOT quadrupole gradient (on during the last 6 s)
         # partly levitates |F=1, mF=-1> atoms; g_eff = g - mu_B B'/(2 m) is a parameter
         self.g = (G if gravity else 0.0) if g_eff is None else g_eff
+        self.fx = fx     # horizontal force per unit mass along x (the weak axis), e.g. from the quadrupole gradient
         self.s = 1.0                       # power scale factor
 
     # ---- potential and force, vectorised over an (N,3) array of positions
@@ -42,7 +43,7 @@ class CrossedTrap:
         rho1 = np.sum(r * r, axis=1) - a1 * a1
         rho2 = np.sum(r * r, axis=1) - a2 * a2
         return (-s * self.U10 * np.exp(-2 * rho1 / self.w1**2) - s * self.U20 * np.exp(-2 * rho2 / self.w2**2)
-                + C.m_Rb * self.g * r[:, 2])
+                + C.m_Rb * self.g * r[:, 2] - C.m_Rb * self.fx * r[:, 0])
 
     def force(self, r, s=None):
         s = self.s if s is None else s
@@ -54,12 +55,18 @@ class CrossedTrap:
         # dU/dr = U_i s (4/w^2) perp * exp(...)  -> force = -grad U
         f = -(s * self.U10 * 4 / self.w1**2 * e1)[:, None] * perp1 - (s * self.U20 * 4 / self.w2**2 * e2)[:, None] * perp2
         f[:, 2] -= C.m_Rb * self.g
+        f[:, 0] += C.m_Rb * self.fx
         return f
 
     # ---- trap characterisation
     def minimum(self, s=None):
         s = self.s if s is None else s
-        res = minimize(lambda x: self.potential(x[None, :], s)[0], np.array([0.0, 0.0, -1e-6]), method="Nelder-Mead", options=dict(xatol=1e-9, fatol=1e-34))
+        best = None
+        for x0 in (np.array([0.0, 0.0, -1e-6]), np.array([5e-6, 0.0, -5e-6]), np.array([-5e-6, 0.0, -5e-6]), np.array([10e-6, 0.0, -10e-6])):
+            res = minimize(lambda x: self.potential(x[None, :], s)[0], x0, method="Nelder-Mead", options=dict(xatol=1e-9, fatol=1e-34))
+            if best is None or res.fun < best.fun:
+                best = res
+        res = best
         return res.x, res.fun
 
     def frequencies(self, s=None, h=0.2e-6):
@@ -75,20 +82,35 @@ class CrossedTrap:
         w2 = np.linalg.eigvalsh(H) / C.m_Rb
         return np.sqrt(np.maximum(w2, 0.0)), r0, U0
 
-    def saddle_depth(self, s=None, n=4001):
-        """Effective depth: lowest barrier for escape.  With gravity the escape
-        is downward along z through the saddle below the minimum; we scan the
-        potential along the vertical line through the minimum and along the
-        two beam-perpendicular directions and return the smallest barrier."""
+    def saddle_depth(self, s=None, half=150e-6, n=96):
+        """Effective depth by watershed: the lowest energy at which the basin of
+        the trap minimum connects to the boundary of a box of half-size `half`
+        (grid of n^3 points).  Robust for arbitrary force directions."""
+        from scipy import ndimage
         s = self.s if s is None else s
         r0, U0 = self.minimum(s)
-        best = np.inf
-        for d in (np.array([0, 0, -1.0]), np.array([0, 0, 1.0]), np.array([1.0, 0, 0]), np.array([-1.0, 0, 0]), np.array([0, 1.0, 0]), np.array([0, -1.0, 0])):
-            lam = np.linspace(0, 200e-6, n)
-            U = self.potential(r0[None, :] + lam[:, None] * d[None, :], s)
-            # barrier = max of U along the ray before it drops below U0 again (or the overall max)
-            best = min(best, U.max() - U0)
-        return best
+        ax = np.linspace(-half, half, n)
+        X, Y, Z = np.meshgrid(ax + r0[0], ax + r0[1], ax + r0[2], indexing="ij")
+        pts = np.stack([X.ravel(), Y.ravel(), Z.ravel()], axis=1)
+        U = self.potential(pts, s).reshape(n, n, n) - U0
+        i0 = (n // 2, n // 2, n // 2)
+        def connected(E):
+            lab, _ = ndimage.label(U < E)
+            l0 = lab[i0]
+            if l0 == 0:
+                return False
+            b = np.concatenate([lab[0].ravel(), lab[-1].ravel(), lab[:, 0].ravel(), lab[:, -1].ravel(), lab[:, :, 0].ravel(), lab[:, :, -1].ravel()])
+            return np.any(b == l0)
+        lo, hi = 0.0, float(np.max(U[np.isfinite(U)]))
+        if not connected(hi):
+            return hi
+        for _ in range(22):
+            mid = 0.5 * (lo + hi)
+            if connected(mid):
+                hi = mid
+            else:
+                lo = mid
+        return 0.5 * (lo + hi)
 
     def set_scale_for_omega(self, omega_bar_target, s_lo=0.01, s_hi=100.0):
         """Choose the power scale s such that the geometric-mean frequency at the
@@ -101,9 +123,12 @@ class CrossedTrap:
         self.s = np.exp(ls)
         return self.s
 
+    def min_search_start(self):
+        return np.array([0.0, 0.0, -1e-6])
 
-def default_trap(power_ratio=1.0, g_eff=None):
+
+def default_trap(power_ratio=1.0, g_eff=None, fx=0.0):
     """Beam depths at the reference scale s = 1: U10 = 1 uK, U20 = U10/power_ratio
     in units of k_B.  The absolute scale is set later by set_scale_for_omega."""
     U10 = 1e-6 * C.kB
-    return CrossedTrap(U10, U10 / power_ratio, g_eff=g_eff)
+    return CrossedTrap(U10, U10 / power_ratio, g_eff=g_eff, fx=fx)
