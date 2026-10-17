@@ -11,7 +11,7 @@ from nebec import constants as C
 from nebec.phasespace.trap import default_trap
 from nebec.phasespace.particles import Cloud
 from nebec.phasespace.run import Simulation
-from nebec.phasespace.analysis import gaussian_fit_T, momentum_temperatures
+from nebec.phasespace.analysis import gaussian_fit_T, momentum_temperatures, experiment_observables
 from nebec.evaporation import make_omega, make_gamma_K, integrated_gamma_K, T1_MEAS
 
 g_fac = float(sys.argv[1]); gamma_bg = float(sys.argv[2]); kfac = float(sys.argv[3])
@@ -36,10 +36,10 @@ print(f"start: N={cl.N:.0f}, particles {cl.r.shape[0]}, alpha {cl.alpha:.2f}, f_
 rows = []
 def cb(S):
     d = S.summary(); Tm = momentum_temperatures(S.cloud)
-    Tg = gaussian_fit_T(S.cloud, axes=(0, 2))
-    d.update(Tmx=Tm[0], Tmy=Tm[1], Tmz=Tm[2], T_gauss_x=Tg[0], T_gauss_z=Tg[1], t_lab=S.t + 1.0)
+    ob = experiment_observables(S.cloud, S.cond, axes=(0, 2))
+    d.update(Tmx=Tm[0], Tmy=Tm[1], Tmz=Tm[2], T_fit_x=ob["T_fit_x"], T_fit_z=ob["T_fit_y"], F_fit=ob["F_fit"], Nth_fit=ob["N_th_fit"], Nc_fit=ob["N_c_fit"], t_lab=S.t + 1.0)
     rows.append(d)
-    print(f"t={d['t_lab']:.2f} N={d['N']:.0f} Nth={d['Nth']:.0f} Nc={d['Nc']:.0f} F={d['F']:.3f} T_kin x,y,z={Tm[0]*1e9:.0f},{Tm[1]*1e9:.0f},{Tm[2]*1e9:.0f} nK  T_gauss x,z={Tg[0]*1e9:.0f},{Tg[1]*1e9:.0f} nK  f_bar={d['f_bar']:.0f} depth={d['depth']/C.nK:.0f} nK c22={d['n_c22']} out={d['n_out']} in={d['n_in']} evap={d['n_evap']:.0f}  [{time.time()-T0:.0f} s]", flush=True)
+    print(f"t={d['t_lab']:.2f} N={d['N']:.0f} Nth={d['Nth']:.0f} Nc={d['Nc']:.0f} F={d['F']:.3f} T_kin x,y,z={Tm[0]*1e9:.0f},{Tm[1]*1e9:.0f},{Tm[2]*1e9:.0f} nK | bimodal fit: T x,z={ob['T_fit_x']*1e9:.0f},{ob['T_fit_y']*1e9:.0f} nK F_fit={ob['F_fit']:.3f} | f_bar={d['f_bar']:.0f} depth={d['depth']/C.nK:.0f} nK c22={d['n_c22']} out={d['n_out']} in={d['n_in']} evap={d['n_evap']:.0f}  [{time.time()-T0:.0f} s]", flush=True)
 T0 = time.time()
 sim.run(1.0, callback=cb, every=0.05)
 json.dump([{k: (float(v) if np.isscalar(v) else v) for k, v in d.items()} for d in rows], open(os.path.join(ROOT, "data", f"ps_{tag}.json"), "w"), indent=1)

@@ -76,10 +76,11 @@ def bose_params(n, ekin):
         kT = ekin / (1.5 * g52 / g32)
         lam3 = (2 * np.pi * HBAR**2 / (M * kT)) ** 1.5
         return n * lam3 - g32
-    if resid(hi) <= 0.0:
-        z = hi
-    elif resid(lo) >= 0.0:
+    # resid(z) decreases with z: n lam^3 falls (kT rises) while g_{3/2} rises
+    if resid(lo) <= 0.0:          # density below the Boltzmann value: z -> 0
         z = lo
+    elif resid(hi) >= 0.0:        # at or above saturation: z -> 1
+        z = hi
     else:
         for _ in range(50):
             mid = 0.5 * (lo + hi)

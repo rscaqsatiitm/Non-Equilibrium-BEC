@@ -60,3 +60,9 @@ Reported in the final message of the session (wc -w on the .tex inputs).
 - Sensitivity, F(2 s) with K: C12 x0.5/x2: 0.42/0.56; C22 x0.5/x2: 0.36/0.57; eta_1 -/+10%: 0.58/0.39; s_omega 0.9: 0.20; L3 0/x2: 0.48/0.48; T1 +10%: 0.41; c -/+20%: 0.52/0.44.
 - Growth-rate benchmark: model C12 rate / Gardiner-1998 W+ = 2.1 to 3.7 at (mu - mu_c)/kT = 0.01 (data/growth_rate_benchmark.txt).
 - Grid convergence: F(2 s) with K changes from 0.477 (n = 160) to 0.469 (n = 480) (data/grid_convergence_3d.json).
+
+## Route 1 and route 2 (added after the first delivery)
+
+- Three-temperature moment model (nebec/twotemp.py, scripts/08): calibration eta_1 = 4.06, p = 6.0 (bound), gamma_bg = 0.106 /s, c_ev = 0.96, chi2 = 125; predictions with K: N(2 s) = 11.7e3, F = 0.48, T_x = T_y = 84 nK, T_z = 41 nK; 4x: F = 0.20, T_xy = 77 nK; no K: T_xy = 90, T_z = 43 nK. The cross-axis relaxation constant 2.7 collisions (Monroe et al. 1993) is recalled, not retrieved [VALUE?].
+- Phase-space model (nebec/phasespace/): trap with real beam geometry (waists 35/45 um, 40 deg crossing, gravity along z with effective g as parameter); saddle depth 2.1 uK (t = 1 s) to 65 nK (t = 2 s) at full gravity, 3.7 uK to 440 nK at g_eff = 0.5 g. DSMC C22 classical collision rate 14.6 Hz against 18 Hz estimated. Condensate exchange kernel: homogeneous-gas detailed balance out/in = 0.97 +- 0.04 (expected 1.00) and 1.81 +- 0.08 (expected 1.82) [SIM, scripts/09b].
+- Bimodal-fit analysis of synthetic TOF images: a saturated non-condensed Bose cloud is assigned F_fit = 0.17; with a condensate of F = 0.27 (0.50) the fit gives F_fit = 0.34 (0.56) and a temperature 20 to 30% below the kinetic one [SIM].
